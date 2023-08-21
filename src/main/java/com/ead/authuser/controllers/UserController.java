@@ -1,6 +1,6 @@
 package com.ead.authuser.controllers;
 
-import com.ead.authuser.Services.UserService;
+import com.ead.authuser.services.UserService;
 import com.ead.authuser.dtos.UserDto;
 import com.ead.authuser.models.UserModel;
 import com.ead.authuser.specifications.SpecificationTemplate;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

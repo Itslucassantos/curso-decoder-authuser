@@ -1,6 +1,6 @@
-package com.ead.authuser.Services.implement;
+package com.ead.authuser.services.implement;
 
-import com.ead.authuser.Services.UserService;
+import com.ead.authuser.services.UserService;
 import com.ead.authuser.models.UserModel;
 import com.ead.authuser.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -21,7 +22,8 @@ import java.util.UUID;
 @Table(name = "TB_USERS")
 // é importante fazer o implements com o Serializable pq ela vai fazer a conversão de objetos java em uma sequência de
 // bytes que pode ser salvo no banco de dados.
-public class UserModel implements Serializable {
+// RepresentationModel<UserModel> para criar os links
+public class UserModel extends RepresentationModel<UserModel> implements Serializable {
 
     //para ver se os dados convertidos é dessa classe, a JVM víncula esse id com cada classe que faz a conversão, que é
     // Serializable, é importante declarar para evitar algumas exeções.

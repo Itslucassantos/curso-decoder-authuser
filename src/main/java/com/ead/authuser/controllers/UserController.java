@@ -20,6 +20,9 @@ import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 // * é permitido que a api seja acessada de qualquer origem e 3600 segundos
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -39,6 +42,28 @@ public class UserController {
             // Sort.Direction.ASC para ordenar de forma ascendente, do menor para o maior.
             direction = Sort.Direction.ASC) Pageable pageable) {
         Page<UserModel> userModelPage = userService.findAll(spec, pageable);
+
+        // para cada usuário ter um link com suas informações.
+        if(!userModelPage.isEmpty()) {
+            for(UserModel user : userModelPage.toList()) {
+                // linkTo(...): É uma função da biblioteca Spring HATEOAS que cria um "link de contexto" para um método
+                // específico no controlador.
+
+                // methodOn(UserController.class).getOneUser(user.getUserId()): Isso se refere a um método chamado
+                // getOneUser no controlador UserController, que obtém um link para exibir os detalhes de um usuário
+                // com base no ID do usuário. O methodOn é uma maneira de criar esse link sem realmente chamar o método
+                // do controlador.
+
+                // withSelfRel(): Isso significa que o link está relacionado ao próprio usuário, ou seja, é um link que
+                // aponta para o próprio objeto de usuário.
+
+                // Em resumo, o código cria um link para o método getOneUser do controlador UserController, que mostra
+                // detalhes de um usuário específico, e esse link está associado ao próprio usuário como recurso.
+                // Isso é útil para ajudar as pessoas a navegar e descobrir informações sobre os usuários em uma API web
+                user.add(linkTo(methodOn(UserController.class).getOneUser(user.getUserId())).withSelfRel());
+            }
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(userModelPage);
     }
 

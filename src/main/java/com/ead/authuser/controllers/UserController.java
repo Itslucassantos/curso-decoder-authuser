@@ -42,9 +42,16 @@ public class UserController {
     public ResponseEntity<Page<UserModel>> getAllUsers( SpecificationTemplate.UserSpec spec,
                                                         @PageableDefault(page = 0, size = 10, sort = "userId",
             // Sort.Direction.ASC para ordenar de forma ascendente, do menor para o maior.
-            direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<UserModel> userModelPage = userService.findAll(spec, pageable);
-
+            direction = Sort.Direction.ASC) Pageable pageable,
+                                                        // required = false diz que esse parâmetro não é obrigatótio,
+                                                        // o usuário pode fazer uma requisição sem esse parâmetro.
+                                                        @RequestParam(required = false) UUID courseId) {
+        Page<UserModel> userModelPage = null;
+        if (courseId != null) {
+            userModelPage = userService.findAll(SpecificationTemplate.userCourseId(courseId).and(spec), pageable);
+        } else {
+            userModelPage = userService.findAll(spec, pageable);
+        }
         // para cada usuário ter um link com suas informações.
         if(!userModelPage.isEmpty()) {
             for(UserModel user : userModelPage.toList()) {

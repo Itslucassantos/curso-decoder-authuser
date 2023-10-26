@@ -1,5 +1,7 @@
 package com.ead.authuser.services.implement;
 
+import com.ead.authuser.models.UserCourseModel;
+import com.ead.authuser.repositories.UserCourseRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.models.UserModel;
 import com.ead.authuser.repositories.UserRepository;
@@ -17,10 +19,12 @@ import java.util.UUID;
 public class UserServiceImplement implements UserService {
 
     private final UserRepository userRepository;
+    private final UserCourseRepository userCourseRepository;
 
     @Autowired
-    public UserServiceImplement(UserRepository userRepository) {
+    public UserServiceImplement(UserRepository userRepository, UserCourseRepository userCourseRepository) {
         this.userRepository = userRepository;
+        this.userCourseRepository = userCourseRepository;
     }
 
     @Override
@@ -35,6 +39,10 @@ public class UserServiceImplement implements UserService {
 
     @Override
     public void delete(UserModel userModel) {
+        List<UserCourseModel> userCourseModelList = this.userCourseRepository.findAllUserCourseIntoUser(userModel.getUserId());
+        if(!userCourseModelList.isEmpty()) {
+            this.userCourseRepository.deleteAll(userCourseModelList);
+        }
         this.userRepository.delete(userModel);
     }
 

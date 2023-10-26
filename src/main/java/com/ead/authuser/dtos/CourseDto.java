@@ -2,11 +2,9 @@ package com.ead.authuser.dtos;
 
 import com.ead.authuser.enums.CourseLevel;
 import com.ead.authuser.enums.CourseStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data

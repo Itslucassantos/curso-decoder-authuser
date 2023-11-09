@@ -1,8 +1,6 @@
 package com.ead.authuser.services.implement;
 
 import com.ead.authuser.clients.CourseClient;
-import com.ead.authuser.models.UserCourseModel;
-import com.ead.authuser.repositories.UserCourseRepository;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.models.UserModel;
 import com.ead.authuser.repositories.UserRepository;
@@ -20,13 +18,11 @@ import java.util.UUID;
 public class UserServiceImplement implements UserService {
 
     private final UserRepository userRepository;
-    private final UserCourseRepository userCourseRepository;
     private final CourseClient courseClient;
 
     @Autowired
-    public UserServiceImplement(UserRepository userRepository, UserCourseRepository userCourseRepository, CourseClient courseClient) {
+    public UserServiceImplement(UserRepository userRepository, CourseClient courseClient) {
         this.userRepository = userRepository;
-        this.userCourseRepository = userCourseRepository;
         this.courseClient = courseClient;
     }
 
@@ -42,16 +38,7 @@ public class UserServiceImplement implements UserService {
 
     @Override
     public void delete(UserModel userModel) {
-        boolean deleteUserCourseInCourse = false;
-        List<UserCourseModel> userCourseModelList = this.userCourseRepository.findAllUserCourseIntoUser(userModel.getUserId());
-        if(!userCourseModelList.isEmpty()) {
-            this.userCourseRepository.deleteAll(userCourseModelList);
-            deleteUserCourseInCourse = true;
-        }
         this.userRepository.delete(userModel);
-        if(deleteUserCourseInCourse) {
-            this.courseClient.deleteUserInCourse(userModel.getUserId());
-        }
     }
 
     @Override

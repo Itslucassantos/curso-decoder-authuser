@@ -39,10 +39,10 @@ public class AuthenticationController {
                                                    @JsonView(UserDto.UserView.RegistrationPost.class) UserDto userDto) {
         // Para ver o que está recebendo, a nível de desenvolvimento. {} é para usar o toString
         log.debug(" POST registerUser userDto received {} ", userDto.toString());
-        if(userService.existsByUserName(userDto.getUserName())) {
+        if(this.userService.existsByUserName(userDto.getUserName())) {
             log.warn(" Username {} is already taken ", userDto.getUserName());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(" Error: Username is already taken! ");
-        } if(userService.existsByEmail(userDto.getEmail())) {
+        } if(this.userService.existsByEmail(userDto.getEmail())) {
             log.warn(" Email {} is already taken ", userDto.getEmail());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(" Error: Email is already taken! ");
         }
@@ -54,7 +54,7 @@ public class AuthenticationController {
         // ZoneId.of("UTC") para definir o formato da data.
         userModel.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
         userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-        userService.save(userModel);
+        this.userService.saveUser(userModel);
         log.debug(" POST registerUser userId saved {} ", userModel.getUserId());
         log.info(" User saved successfully userId {} ", userModel.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(userModel);

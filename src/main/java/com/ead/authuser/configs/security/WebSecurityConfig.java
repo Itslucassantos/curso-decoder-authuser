@@ -18,7 +18,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     // Libera o acesso para esses endpoints sem precisar de autenticacao. Abordagem bem melhor de se dar permissao.
     private static final String[] AUTH_WHITELIST = {
-            "/ead-authuser/auth/**"
+            "/auth/**"
     };
 
     @Override

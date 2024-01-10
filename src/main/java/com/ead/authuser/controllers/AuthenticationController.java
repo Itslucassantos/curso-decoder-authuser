@@ -1,5 +1,8 @@
 package com.ead.authuser.controllers;
 
+import com.ead.authuser.enums.RoleType;
+import com.ead.authuser.models.RoleModel;
+import com.ead.authuser.services.RoleService;
 import com.ead.authuser.services.UserService;
 import com.ead.authuser.dtos.UserDto;
 import com.ead.authuser.enums.UserStatus;
@@ -7,12 +10,11 @@ import com.ead.authuser.enums.UserType;
 import com.ead.authuser.models.UserModel;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +30,16 @@ public class AuthenticationController {
 
     private final UserService userService;
 
+    private final RoleService roleService;
+
+    // Para poder criptografar a senha no bd
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AuthenticationController(UserService userService) {
+    public AuthenticationController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/signup")
@@ -46,6 +55,12 @@ public class AuthenticationController {
             log.warn(" Email {} is already taken ", userDto.getEmail());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(" Error: Email is already taken! ");
         }
+        RoleModel roleModel = this.roleService.findByRoleName(RoleType.ROLE_STUDENT)
+                // se nao tiver nenhum retorno do bd, a role nao existir ele retorna a excecao
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+
+        // set na senha, deixando-a criptografada para salvar no bd.
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         UserModel userModel = new UserModel();
         //Para converter o dto em model.
         BeanUtils.copyProperties(userDto, userModel);
@@ -54,6 +69,7 @@ public class AuthenticationController {
         // ZoneId.of("UTC") para definir o formato da data.
         userModel.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
         userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+        userModel.getRoles().add(roleModel);
         this.userService.saveUser(userModel);
         log.debug(" POST registerUser userId saved {} ", userModel.getUserId());
         log.info(" User saved successfully userId {} ", userModel.getUserId());

@@ -12,6 +12,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -47,21 +49,19 @@ public class CourseClient {
     fallbackMethod = "circuitbreakerfallback"), dessa forma nunca envia o erro, o cliente pode achar que não existe esse
     user.*/
     @CircuitBreaker(name = "circuitbreakerInstance")
-    public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable) {
+    public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable, String token) {
         List<CourseDto> searchResult = null;
         String url = REQUEST_URL_COURSE + this.utilsService.createUrl(userId, pageable);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<String> requestEntity = new HttpEntity<String>("parameters", headers);
         log.debug("Request URL: {} ", url);
         log.info("Request URL: {} ", url);
-        try {
-            ParameterizedTypeReference<ResponsePageDto<CourseDto>> responseType =
-                    new ParameterizedTypeReference<ResponsePageDto<CourseDto>>() {};
-            // fazer a solicitação para o CourseMicroservice, a outra api. para obter a listagem de um curso para um determinado usuário.
-            ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url, HttpMethod.GET, null, responseType);
-            searchResult = result.getBody().getContent();
-            log.debug(" Response Number of Elements: {} ", searchResult.size());
-        } catch (HttpStatusCodeException e) {
-            log.error(" Error request /courses {} ", e);
-        }
+        ParameterizedTypeReference<ResponsePageDto<CourseDto>> responseType = new ParameterizedTypeReference<ResponsePageDto<CourseDto>>() {};
+        // fazer a solicitação para o CourseMicroservice, a outra api. para obter a listagem de um curso para um determinado usuário.
+        ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
+        searchResult = result.getBody().getContent();
+        log.debug(" Response Number of Elements: {} ", searchResult.size());
         log.info( "Ending request /courses userId {} ", userId);
         return new PageImpl<>(searchResult);
     }
